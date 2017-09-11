@@ -26,59 +26,23 @@ public class Player : MonoBehaviour {
 		velocity = target = Vector2.zero;
 	}
 
-	float GetDamage(Collider2D other){
-		var damage = other.GetComponent<Damage> ();
-		if (damage == null) {
-			return 0.0f;
-		}
-
-		return damage.Strength;
-	}
-
-	bool GetBlocker(Collider2D other){
-		var blocker = other.GetComponent<Blocker> ();
-		if (blocker == null) {
-			return false;
-		}
-
-		return true;
-	}
-
-	float GetForce(Collider2D other, bool consume){
-		var force = other.GetComponent<Force> ();
-		if (force == null || force.IsConsumed()) {
-			return 0.0f;
-		}
-
-		if (consume) {
-			force.Consume();
-		}
-
-		return force.Strength;		
-	}
-
-	float GetStream(Collider2D other, out Vector2 direction){
-		var stream = other.GetComponent<Stream> ();
-		if (stream == null) {
-			direction = new Vector2 ();
-			return 0.0f;
-		}
-
-		direction = stream.Direction;
-		return stream.Strength;		
-	}
-
 	void OnCollisionEnter2D(Collision2D other)
 	{
 		//Debug.Log ("Collision with " + other.collider.name);
 
-		var damage = GetDamage (other.collider);
-		if (damage > 0) {
+		var collectible = other.collider.GetComponent<Collectible> ();
+		if (collectible) {
+			Destroy (other.gameObject);
+			return;
+		}
+
+		var damage = other.collider.GetComponent<Damage> ();
+		if (damage) {
 			Die ();
 			return;
 		}
 
-		var blocker = GetBlocker (other.collider);
+		var blocker = other.collider.GetComponent<Blocker> ();
 		if (blocker) {
 			velocity = Vector2.zero;
 
@@ -91,8 +55,10 @@ public class Player : MonoBehaviour {
 			return;
 		}
 
-		var force = GetForce (other.collider, true);	// Todo: only consume if ripple?
-		if (force > 0) {
+		var force = other.collider.GetComponent<Force> ();
+		if (force && !force.IsConsumed()) {
+			force.Consume();
+
 			var myPosition = new Vector2 (transform.position.x, transform.position.y);
 			var otherPosition = new Vector2 (other.transform.position.x, other.transform.position.y);
 			var direction = myPosition - otherPosition;
@@ -108,8 +74,8 @@ public class Player : MonoBehaviour {
 				}
 			}
 
-			//Debug.Log(direction.normalized + " - " + force);
-			target += direction.normalized * force;
+			//Debug.Log(direction.normalized + " - " + force.Strength);
+			target += direction.normalized * force.Strength;
 			return;
 		}
 
@@ -125,10 +91,9 @@ public class Player : MonoBehaviour {
 		}
 
 		// Execute every frame
-		Vector2 streamDirection;
-		var stream = GetStream (other.collider, out streamDirection);
-		if (stream > 0) {
-			target += streamDirection * stream;
+		var current = other.collider.GetComponent<Current> ();
+		if (current) {
+			target += current.Direction * current.Strength;
 		}
 	}
 }
