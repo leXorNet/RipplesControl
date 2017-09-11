@@ -5,8 +5,9 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 
 	Vector2 target = new Vector2();
+	float timeStay = 0.0f;
 
-	public float smoothTime = 0.3f;
+	private float smoothTime = 0.2f;
 	private Vector2 velocity = Vector2.zero;
 
 	// Use this for initialization
@@ -56,6 +57,17 @@ public class Player : MonoBehaviour {
 		return force.Strength;		
 	}
 
+	float GetStream(Collider2D other, out Vector2 direction){
+		var stream = other.GetComponent<Stream> ();
+		if (stream == null) {
+			direction = new Vector2 ();
+			return 0.0f;
+		}
+
+		direction = stream.Direction;
+		return stream.Strength;		
+	}
+
 	void OnCollisionEnter2D(Collision2D other)
 	{
 		//Debug.Log ("Collision with " + other.collider.name);
@@ -96,15 +108,27 @@ public class Player : MonoBehaviour {
 				}
 			}
 
-			bool fixedMoveSpeed = false;
-			if (fixedMoveSpeed) {
-				force *= direction.magnitude * 0.3f;
-			}
-
 			//Debug.Log(direction.normalized + " - " + force);
 			target += direction.normalized * force;
 			return;
 		}
+
+
 	}
 
+
+	void OnCollisionStay2D(Collision2D other)
+	{
+		// Execute once every second.
+		if (Time.time - timeStay > 1.0f) {
+			timeStay = Time.time;	
+		}
+
+		// Execute every frame
+		Vector2 streamDirection;
+		var stream = GetStream (other.collider, out streamDirection);
+		if (stream > 0) {
+			target += streamDirection * stream;
+		}
+	}
 }

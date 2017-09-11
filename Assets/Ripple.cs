@@ -5,7 +5,7 @@ using UnityEngine;
 public class Ripple : MonoBehaviour {
 
 	private Force force;
-	public float Duration = 0.5f;
+	private float Duration = 0.3f;
 
 	bool started = false;
 	float time = 0.0f;
@@ -39,13 +39,12 @@ public class Ripple : MonoBehaviour {
 		//Debug.Log("Ripple level " + level);
 
 		if (level == 1) {
-			force.Strength = 1.0f;
-			force.Range = 0.5f;
+			force.Strength = 1.5f;
+			force.Range = 0.75f;
 
 		} else if (level == 2) {
-			force.Strength = 2.0f;
+			force.Strength = 3.0f;
 			force.Range = 1.0f;
-			//Duration = 0.5f;
 
 			SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer> ();
 			spriteRenderer.color = new Color(1.0f, 0.0f, 0.0f, 1.0f);
