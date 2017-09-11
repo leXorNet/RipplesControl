@@ -7,9 +7,11 @@ public class Ripples : MonoBehaviour {
 	public Ripple RipplePrefab;
 	float timeDown = 0.0f;
 
+	CameraControl cameraControl;
+
 	// Use this for initialization
 	void Start () {
-		
+		cameraControl = Camera.main.GetComponent<CameraControl>();
 	}
 	
 	// Update is called once per frame
@@ -19,7 +21,7 @@ public class Ripples : MonoBehaviour {
 			timeDown = Time.time;
 
 		} else if (Input.GetMouseButtonUp (0)) {
-			var ripplePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+			var ripplePos = cameraControl.ScreenToGround(Input.mousePosition);
 			ripplePos.z = 0;
 
 			var rippleInstance = Instantiate (RipplePrefab);
